@@ -1,0 +1,15 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "tpch",
+      "Group": "tpch",
+      "Host": "postgres-tpch",
+      "Port": 5432,
+      "MaintenanceDB": "postgres",
+      "Username": "postgres",
+      "SSLMode": "prefer",
+      "Password": "1"
+    }
+  }
+}
+
