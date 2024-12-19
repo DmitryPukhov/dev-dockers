@@ -1,0 +1,72 @@
+# Copyright Broadcom, Inc. All Rights Reserved.
+# SPDX-License-Identifier: APACHE-2.0
+
+services:
+  kafka-0:
+    image: docker.io/bitnami/kafka:latest
+    hostname: kafka-0
+    ports:
+      - "9092:9092"
+    environment:
+      # KRaft settings
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka-0:9093
+      - KAFKA_KRAFT_CLUSTER_ID=abcdefghijklmnopqrstuv
+      # Listeners
+      - KAFKA_CFG_LISTENERS=PLAINTEXT_LOCAL://:9091,CONTROLLER://:9093,PLAINTEXT_EXTERNAL://:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT_EXTERNAL://localhost:9092,PLAINTEXT_LOCAL://:9091
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT_LOCAL:PLAINTEXT,PLAINTEXT_EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT_LOCAL
+    networks:
+      - kafka-network
+
+  # Kafka UI
+  kafka-ui:
+    container_name: kafka-ui
+    hostname: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - 8080:8080
+    depends_on:
+      - kafka-0
+    networks:
+      - kafka-network
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-0:9091
+  schema-registry:
+    hostname: schema-registry
+    image: docker.io/bitnami/schema-registry:7.6
+    ports:
+      - '8082:8081'
+    depends_on:
+      - kafka-0
+    environment:
+      - SCHEMA_REGISTRY_LISTENERS=http://0.0.0.0:8081
+      - SCHEMA_REGISTRY_KAFKA_BROKERS=PLAINTEXT://kafka-0:9091
+    networks:
+      - kafka-network
+
+
+  # Init schema registry, create schemas and exit
+  schema-registry-init:
+    container_name: schema-registry-init
+    hostname: schema-registry-init
+    depends_on: [ schema-registry ]
+    image: ubuntu
+    volumes:
+      - ./init-registry.sh:/init-registry.sh
+      - ./initial-schemas:/initial-schemas
+    command: ["bash", "/init-registry.sh"]
+    networks:
+      - kafka-network
+
+networks:
+  kafka-network:
+#volumes:
+#  kafka0_data:
+#    driver: local
+#  kafka1_data:
+#    driver: local

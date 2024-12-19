@@ -1,0 +1,4 @@
+{
+  "schema": "{\"type\":\"record\",\"name\":\"measurement_float\",\"fields\":[{\"name\":\"Value\",\"type\":\"float\"}]}"
+}
+

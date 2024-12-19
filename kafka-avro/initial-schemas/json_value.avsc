@@ -1,0 +1,4 @@
+{
+  "schema": "{\"type\":\"record\",\"name\":\"json_value\",\"fields\":[{\"name\":\"Value\",\"type\":[\"null\",\"float\",\"int\"]}]}"
+}
+
