@@ -1,4 +1,4 @@
-FROM postgres:12.3
+FROM postgres:17.3
 
 # The scale factor that is used by default to generate the raw TPC-H data.
 # You can change the value of this environment parameter if you want a different
