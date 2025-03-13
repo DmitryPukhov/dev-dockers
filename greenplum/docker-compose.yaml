@@ -1,0 +1,84 @@
+# Greenplum cluster
+version: '3.8'
+
+services:
+#  initializer:
+#    image: ubuntu:latest
+#    networks:
+#      - greenplum-network
+#    volumes:
+#      - gpdb-src-volume:/gpdb-src
+#      - gpdb-scripts-volume:/gpdb-scripts
+#    command: "/gpdb-scripts/coordinate-cluster.sh"
+#    depends_on:
+#      - cdw
+#      - sdw1
+#      - sdw2
+#      - sdw3
+
+  # Base service to inherit from
+  greenplum-base: &greenplum-base
+    build:
+      context: ./build
+      dockerfile: Dockerfile
+      tags: ['gpdb7-multinode-cluster/gpdb-image']
+
+    restart: always
+    tty: true
+
+    networks:
+      - greenplum-network
+    volumes:
+      - gpdb-src-volume:/gpdb-src
+      - gpdb-scripts-volume:/gpdb-scripts
+
+  # Coordinator
+  cdw:
+    <<: *greenplum-base
+
+    hostname: cdw
+    #command: "/gpdb-scripts/init-cdw.sh"
+
+    ports: ['5432:5432', '7000:7000']
+
+  # Segment
+  sdw1:
+    <<: *greenplum-base
+    hostname: sdw1
+    #command: "/gpdb-scripts/init-sdw.sh"
+
+  # Segment
+  sdw2:
+    <<: *greenplum-base
+    hostname: sdw2
+    #command: "/gpdb-scripts/init-cdw.sh"
+
+  # Segment
+  sdw3:
+    <<: *greenplum-base
+    hostname: sdw3
+    #command: "/gpdb-scripts/init-cdw.sh"
+
+networks:
+  greenplum-network:
+
+volumes:
+  gpdb-pgadmin-data:
+
+  gpdb-src-volume:
+    driver_opts:
+      o: bind
+      type: none
+      device: ${PWD}/gpdb-src
+
+  gpdb-scripts-volume:
+    driver_opts:
+      o: bind
+      type: none
+      device: ${PWD}/scripts
+  
+#  gpdb-rpm-volume:
+#    driver_opts:
+#      o: bind
+#      type: none
+#      device: ${GPDB_RPM:-/tmp}

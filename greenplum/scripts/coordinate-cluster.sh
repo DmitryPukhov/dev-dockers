@@ -1,0 +1,27 @@
+#! /bin/bash
+set -e
+
+BUILD=${1:-"source"}
+
+
+if [ $BUILD != "rpm" ] && [ $BUILD != "source" ]; then
+    echo "Invalid argument: $BUILD"
+    exit 1
+fi
+
+# Compile GPDB
+if [ $BUILD == "source" ]; then
+    docker exec -it greenplum-cdw-1 /gpdb-scripts/compile-gpdb.sh
+fi
+
+# Install and prepare for GPDB
+for host in cdw sdw1 sdw2 sdw3; do
+    docker exec -it greenplum-${host}-1 /gpdb-scripts/install-and-prep-for-gpdb.sh $BUILD
+done
+
+# Create the GPDB cluster
+docker exec -it greenplum-cdw-1 /gpdb-scripts/create-gpdb-cluster.sh
+
+## Set up access
+docker exec -it greenplum-cdw-1 /gpdb-scripts/setup_external_access.sh
+
