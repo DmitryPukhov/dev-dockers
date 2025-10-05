@@ -2,19 +2,19 @@
 version: '3.8'
 
 services:
-#  initializer:
-#    image: ubuntu:latest
-#    networks:
-#      - greenplum-network
-#    volumes:
-#      - gpdb-src-volume:/gpdb-src
-#      - gpdb-scripts-volume:/gpdb-scripts
-#    command: "/gpdb-scripts/coordinate-cluster.sh"
-#    depends_on:
-#      - cdw
-#      - sdw1
-#      - sdw2
-#      - sdw3
+  initializer:
+    image: ubuntu
+    networks:
+      - greenplum-network
+    volumes:
+      - gpdb-src-volume:/gpdb-src
+      - gpdb-scripts-volume:/gpdb-scripts
+    command: "sleep infinity"
+    depends_on:
+      - cdw
+      - sdw1
+      - sdw2
+      - sdw3
 
   # Base service to inherit from
   greenplum-base: &greenplum-base
