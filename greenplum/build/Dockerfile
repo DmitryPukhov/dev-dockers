@@ -1,4 +1,4 @@
-FROM gcr.io/data-gpdb-public-images/gpdb7-rocky8-test-multiarch
+FROM rockylinux:8
 
 COPY install-dependencies.sh /opt
 COPY setup-gpadmin.sh /opt
