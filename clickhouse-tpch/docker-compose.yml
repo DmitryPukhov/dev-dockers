@@ -1,16 +1,88 @@
 version: '3.8'
+
+  # Common clickhouse service to inherit from
+x-clickhouse-base: &clickhouse-base
+  build:
+    context: .
+    dockerfile: Dockerfile
+  user: "101:101"
+  depends_on:
+    - zookeeper
+
 services:
-  clickhouse:
-#    image: clickhouse/clickhouse-server
-    build:
-      context: .
-      dockerfile: Dockerfile
-    environment:
-      - CLICKHOUSE_USER=clickhouse
-      - CLICKHOUSE_PASSWORD=clickhouse
-    user: "101:101"
-    container_name: clickhouse
-    hostname: clickhouse
+
+  zookeeper:
+    image: zookeeper:3.7
+    container_name: zookeeper
+    hostname: zookeeper
     ports:
-      - "127.0.0.1:8123:8123"
-      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:2181:2181"
+
+########### Shard 1 with 2 replicas
+  clickhouse-11:
+    <<: *clickhouse-base
+    container_name: clickhouse-11
+    hostname: clickhouse-11
+    volumes:
+      - ./clickhouse/shard1/ch01/config.xml:/etc/clickhouse-server/config.d/config.xml
+      - ./clickhouse/shard1/ch01/users.xml:/etc/clickhouse-server/users.d/users.xml
+    ports:
+      - "127.0.0.1:8111:8123"
+      - "127.0.0.1:9011:9000"
+
+  clickhouse-12:
+    <<: *clickhouse-base
+    container_name: clickhouse-12
+    hostname: clickhouse-12
+    volumes:
+      - ./clickhouse/shard2/ch01/config.xml:/etc/clickhouse-server/config.d/config.xml
+      - ./clickhouse/shard2/ch01/users.xml:/etc/clickhouse-server/users.d/users.xml
+    ports:
+      - "127.0.0.1:8112:8123"
+      - "127.0.0.1:9012:9000"
+
+  ########### Shard 2 with 2 replicas
+  clickhouse-13:
+    <<: *clickhouse-base
+    container_name: clickhouse-13
+    hostname: clickhouse-13
+    volumes:
+      - ./clickhouse/shard1/ch02/config.xml:/etc/clickhouse-server/config.d/config.xml
+      - ./clickhouse/shard1/ch02/users.xml:/etc/clickhouse-server/users.d/users.xml
+    ports:
+      - "127.0.0.1:8113:8123"
+      - "127.0.0.1:9013:9000"
+
+  clickhouse-14:
+    <<: *clickhouse-base
+    container_name: clickhouse-14
+    hostname: clickhouse-14
+    volumes:
+      - ./clickhouse/shard2/ch02/config.xml:/etc/clickhouse-server/config.d/config.xml
+      - ./clickhouse/shard2/ch02/users.xml:/etc/clickhouse-server/users.d/users.xml
+    ports:
+      - "127.0.0.1:8114:8123"
+      - "127.0.0.1:9014:9000"
+
+  ########### Shard 3 with 2 replicas
+  clickhouse-31:
+    <<: *clickhouse-base
+    container_name: clickhouse-31
+    hostname: clickhouse-31
+    volumes:
+      - ./clickhouse/shard3/ch01/config.xml:/etc/clickhouse-server/config.d/config.xml
+      - ./clickhouse/shard3/ch01/users.xml:/etc/clickhouse-server/users.d/users.xml
+    ports:
+      - "127.0.0.1:8131:8123"
+      - "127.0.0.1:9031:9000"
+
+  clickhouse-33:
+    <<: *clickhouse-base
+    container_name: clickhouse-33
+    hostname: clickhouse-33
+    volumes:
+      - ./clickhouse/shard3/ch02/config.xml:/etc/clickhouse-server/config.d/config.xml
+      - ./clickhouse/shard3/ch02/users.xml:/etc/clickhouse-server/users.d/users.xml
+    ports:
+      - "127.0.0.1:8133:8123"
+      - "127.0.0.1:9033:9000"
